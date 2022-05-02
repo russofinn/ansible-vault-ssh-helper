@@ -1,0 +1,6 @@
+---
+# handlers file for vault-ssh-helper
+- name: Restart sshd
+  service:
+    name: sshd
+    state: restarted

@@ -1,0 +1,17 @@
+- name: (Debian-like) Create default user
+  ansible.builtin.user:
+    name: "{{ default_linux_user }}"
+    comment: "Usuário padrão do Cofre (Hashicorp Vault)"
+    shell: /bin/bash
+    groups: sudo
+    expires: -1
+    append: yes
+
+- name: (Debian-like) Create ansible user
+  ansible.builtin.user:
+    name: "ansible"
+    comment: "Usuário de automação"
+    shell: /bin/bash
+    groups: sudo
+    expires: -1
+    append: yes

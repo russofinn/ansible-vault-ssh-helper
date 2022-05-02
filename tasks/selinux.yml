@@ -1,0 +1,27 @@
+- name: (RedHat-like) check SELinux loaded modules
+  ansible.builtin.command: "semodule -l"
+  register: selinuxmodules
+
+- name: (RedHat-like) Install selinux-policy-devel
+  ansible.builtin.package:
+    name: selinux-policy-devel
+    state: present
+
+- name:
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/vault-ssh-helper.d/
+    owner: root
+    group: root
+    mode: '0700'
+  with_items:
+    - vault-ssh-helper.te
+
+- ansible.builtin.fail:
+    msg: "WARNING - Run command on host {{ ansible_hostname }}: cd /etc/vault-ssh-helper.d/ && make -f /usr/share/selinux/devel/Makefile vault-ssh-helper.te && semodule -i vault-ssh-helper.pp"
+  ignore_errors: true
+
+#- name: (RedHat-like) install SELinux module for vault-ssh-helper
+#  ansible.builtin.command: "semodule -i /etc/vault-ssh-helper.d/vault-ssh-helper.pp"
+#  when: selinuxmodules.stdout.find('vault-ssh-helper') == -1
+

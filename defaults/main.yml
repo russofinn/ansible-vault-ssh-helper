@@ -1,0 +1,17 @@
+---
+# defaults file for vault-ssh-helper
+vault_ssh_helper_version: "0.2.1"
+ssh_mount_point: ssh
+vault_ca_cert_file: "-dev"
+
+required_vars:
+  - vault_addr
+  - ssh_mount_point
+  - vault_ca_cert_file
+  - vault_token
+
+tls_skip_verify: !!str true
+allowed_roles: "*"
+ca_cert: /etc/vault-ssh-helper.d/vault.crt
+default_linux_user: "user"
+rotate_local_password: !!str false
