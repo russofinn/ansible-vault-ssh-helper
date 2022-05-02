@@ -1,6 +1,6 @@
 
 - name: (Debian-like) Modify PAM SSHD, comment common-auth mechanism
-  ansible.builtin.lineinfile:
+  lineinfile:
     firstmatch: yes
     path: /etc/pam.d/sshd
     regexp: "^@include common-auth"
@@ -8,7 +8,7 @@
     state: present
 
 - name: (Debian-like) Insert the vault-ssh-helper configuration for ssh auth
-  ansible.builtin.blockinfile:
+  blockinfile:
     path: /etc/pam.d/sshd
     block: |
       auth requisite  pam_exec.so quiet expose_authtok log=/var/log/vault-ssh.log /usr/local/bin/vault-ssh-helper -dev -config=/etc/vault-ssh-helper.d/config.hcl

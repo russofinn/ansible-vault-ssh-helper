@@ -1,5 +1,5 @@
 - name: Copia rotate_linux_password.sh
-  ansible.builtin.copy:
+  copy:
     src: rotate_linux_password.sh
     dest: /etc/vault-ssh-helper.d
     owner: root
@@ -7,7 +7,7 @@
     mode: '0700'
 
 - name: Copia profile para adicionar as várivais do VAULT
-  ansible.builtin.template:
+  template:
     src: vault.sh
     dest: /etc/profile.d/vault.sh
     mode: '0700'
@@ -15,7 +15,7 @@
     group: root
 
 - name: "Adiciona um trabalho no cron para rotacionar a senha local do usuário padrão"
-  ansible.builtin.cron:
+  cron:
     name: "rotate local password for {{ item.user }}"
     minute: "{{ item.minute }}"
     hour: "{{ item.hour }}"
@@ -26,7 +26,7 @@
     - { user: "ansible", minute: '0', hour: '*/6' }
 
 # - name: Realiza a chamada inicial do comando
-#   ansible.builtin.command: "/etc/vault-ssh-helper.d/rotate_linux_password.sh {{ item }}"
+#   command: "/etc/vault-ssh-helper.d/rotate_linux_password.sh {{ item }}"
 #   with_items:
 #     - "{{ default_linux_user }}"
 #     - "ansible"

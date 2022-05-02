@@ -1,5 +1,5 @@
 - name: (RedHat-like) Create default user
-  ansible.builtin.user:
+  user:
     name: "{{ default_linux_user }}"
     comment: "Usuário padrão do Cofre (Hashicorp Vault)"
     shell: /bin/bash
@@ -8,7 +8,7 @@
     append: yes
 
 - name: (RedHat-like) Create ansible user
-  ansible.builtin.user:
+  user:
     name: "ansible"
     comment: "Usuário de automação"
     shell: /bin/bash

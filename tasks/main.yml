@@ -2,13 +2,13 @@
 # tasks file for vault-ssh-helper
 
 - name: Verificar as veriaveis necessárias
-  ansible.builtin.fail:
+  fail:
     msg: "Variable '{{ item }}' is not defined"
   when: item not in vars
   with_items: "{{ required_vars }}"
 
 - name: Verificar acessibilidade do Vault e se ele está selado
-  ansible.builtin.uri:
+  uri:
     url: "{{ vault_addr }}/v1/sys/seal-status"
     validate_certs: no
     method: GET
@@ -17,12 +17,12 @@
   register: vault_seal_status
 
 - name: Falha se o servidor do Vault não estiver disponível
-  ansible.builtin.fail:
+  fail:
     msg: "O servidor do Vault está selado ou não disponível"
   when: vault_seal_status.json.sealed
 
 - name: Instala os pacotes necessários
-  ansible.builtin.package:
+  package:
     name: "{{ item }}"
     state: present
   with_items:
@@ -34,15 +34,15 @@
   block:
   - name: "Download baseado na arquitetura (x86_64 or amd64)"
     when: ansible_architecture == "x86_64" or ansible_architecture == "amd64"
-    ansible.builtin.set_fact:
+    set_fact:
       download_url: https://releases.hashicorp.com/vault-ssh-helper/{{ vault_ssh_helper_version }}/vault-ssh-helper_{{ vault_ssh_helper_version }}_linux_amd64.zip
   - name: "Download baseado na arquitetura (aarch64 or arm)"
     when: ansible_architecture == "aarch64" or (ansible_architecture.find("arm") != -1)
-    ansible.builtin.set_fact:
+    set_fact:
       download_url: https://releases.hashicorp.com/vault-ssh-helper/{{ vault_ssh_helper_version }}/vault-ssh-helper_{{ vault_ssh_helper_version }}_linux_arm.zip
 
 - name:
-  ansible.builtin.unarchive:
+  unarchive:
     src: "{{ download_url }}"
     dest: /usr/local/bin
     remote_src: yes
@@ -55,44 +55,44 @@
   delay: 2
 
 - name: Crie um novo diretorio para as configurações do vault-ssh-helper
-  ansible.builtin.file:
+  file:
     path: "/etc/vault-ssh-helper.d"
     state: directory
 
 - name: Copie o arquivo de configuração do vault-ssh-helper
-  ansible.builtin.template:
+  template:
     src: config.hcl
     dest: /etc/vault-ssh-helper.d/config.hcl
 
 - name: Verifica as configurações do vault-ssh-helper
-  ansible.builtin.command: "/usr/local/bin/vault-ssh-helper -dev -verify-only -config=/etc/vault-ssh-helper.d/config.hcl"
+  command: "/usr/local/bin/vault-ssh-helper -dev -verify-only -config=/etc/vault-ssh-helper.d/config.hcl"
   register: verify_vault_ssh_helper
   changed_when: False
 
-- ansible.builtin.debug:
+- debug:
     msg: "{{ verify_vault_ssh_helper.stderr }}"
 
 - name: Falha a automação se as configurações estiverem incorretas
-  ansible.builtin.fail:
+  fail:
     msg: "A configuração falhou"
   when: "'successful' not in verify_vault_ssh_helper.stderr"
 
 - name: Inclui as alterações no PAM baseado na familia do Linux
-  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}_pam.yml"
+  include_tasks: "{{ ansible_os_family | lower }}_pam.yml"
 
 - name: Inclui as alterações sshd_config
-  ansible.builtin.include_tasks: sshd.yml
+  include_tasks: sshd.yml
 
 - name: Inclui módulos do SELinux apenas para familia RedHat que possui SELinux no modo enforcing
-  ansible.builtin.include_tasks: selinux.yml
+  include_tasks: selinux.yml
   when: ansible_os_family == "RedHat" and (ansible_selinux.config_mode is defined and ansible_selinux.config_mode == 'enforcing')
 
-- ansible.builtin.debug:
+- debug:
     msg: "SELinux is not enabled. We strongly recommend enabling"
   when: ansible_os_family == "RedHat" and (ansible_selinux.config_mode is not defined or ansible_selinux.config_mode == 'disabled')
 
 - name: Inclui a criação dos usuários baseado na familia do Linux
-  ansible.builtin.include_tasks: "{{ ansible_os_family | lower }}_users.yml"
+  include_tasks: "{{ ansible_os_family | lower }}_users.yml"
 
 - name: Adiciona o usuário padrão a executar qualquer comandos como root (sem senha)
   community.general.sudoers:
@@ -107,5 +107,5 @@
     - "ansible"
 
 - name: Inclui os scripts para realizar o rotate local das senhas
-  ansible.builtin.include_tasks: rotate.yml
+  include_tasks: rotate.yml
   when: rotate_local_password | bool

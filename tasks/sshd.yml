@@ -1,5 +1,5 @@
 - name: Altera configurações no sshd_config
-  ansible.builtin.lineinfile:
+  lineinfile:
     dest: /etc/ssh/sshd_config
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
